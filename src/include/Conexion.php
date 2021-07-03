@@ -6,7 +6,7 @@ function OpenCon()
 	$dbhost = "127.0.0.1";
 	$dbuser = "root";
 	$dbpass = "123456";
-	$db = "cocoa";
+	$db = "cic";
 	$conn = new mysqli($dbhost, $dbuser, $dbpass,$db) or die("Connect failed: %s\n". $conn -> error);
 	if ($conn->connect_error) {
 	    die("Connection failed: " . $conn->connect_error);
@@ -15,7 +15,7 @@ function OpenCon()
 		printf("Error cargando el conjunto de caracteres utf8: %s\n", $conn->error);
 		exit();
 	} else {
-		printf("Conjunto de caracteres actual: %s\n", $conn->character_set_name());
+		//printf("Conjunto de caracteres actual: %s\n", $conn->character_set_name());
 	}
 
 	return $conn;

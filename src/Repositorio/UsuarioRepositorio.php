@@ -6,16 +6,13 @@ include_once  ROOT_PATH.'/include/Const.php';
 */
 class UsuarioRepositorio 
 {
-    
-    protected $atributos = ['id','usuario', 'contrasenia','estadousuario','compania' ];
-    protected $atributosUP = ['id','usuario', 'estadousuario', 'fregistro', 'idpersona', 'identificacion', 'nombres', 'apellidos', 'fnacimiento', 'direccion', 'telefono', 'correo'  ];
-    protected $atributosLogin = ['id','usuario', 'contrasenia', 'identificacion','nombres', 'apellidos', 'compania' ];
+
+    protected $atributos = ['id','idcliente', 'usuario','pass','estado' ];
+    protected $atributosUP = ['id','idcliente', 'usuario', 'estado', 'nombre', 'apellido', 'direccion', 'telefono', 'correo' ];
+    protected $atributosLogin = ['id','idcliente', 'usuario', 'pass', 'estado', 'nombre', 'apellido', 'direccion', 'telefono', 'correo' ];
     protected $tabla="usuario";
-    protected $tablaUP="usuariopersona";
-    protected $tablaP="persona";
-    protected $tablaUsarioPersona="usuariopersona";
-    protected $tablaPersona="persona";
-    protected $ESTADO_ACTVO="ACT";
+    protected $tablaCliente="cliente";
+    protected $ESTADO_ACTVO=1;
 
     private function leerResultado($result, $arrAtrib){  
         $usuarios = array();       
@@ -144,16 +141,19 @@ class UsuarioRepositorio
         $statusCode=500;
         $mensaje='';	
         try {
+
+            $atributosLogin = ['id','idcliente', 'usuario', 'pass', 'estado', 'nombre', 'apellido', 'direccion', 'telefono', 'correo' ];
             $conn=OpenCon();        
-            $stmt = $conn->prepare('select u.id, u.usuario, up.persona, p.identificacion, p.nombres, p.apellidos, u.compania, u.contrasenia  from '.$this->tabla.' u  left join '.$this->tablaUsarioPersona.' up on up.usuario=u.id  left join '.$this->tablaPersona.' p on up.persona=p.id where u.usuario= ? and u.estadousuario="ACT"  ');
+            $stmt = $conn->prepare('select u.id, u.pass,  u.idcliente, u.usuario, u.estado, c.nombre, c.apellido, c.direccion, c.telefono, c.correo from '.$this->tabla.' u  left join '.$this->tablaCliente.' c on u.idcliente=c.id  where u.usuario= ? and u.estado="1"  ');
             $stmt->bind_param('s', $usuario); // 's' specifies the variable type => 'string' a las dos variables            
             $stmt->execute();
             $result = $stmt->get_result();            
             if ( $result) {
                 if ($result->num_rows > 0) {
                     $usuarios = $this->leerResultado($result, $this->atributosLogin); 
-                    $_contrasenia=$usuarios[0]["contrasenia"];
-                    if (password_verify("123", $_contrasenia)) {                        
+                    $_contrasenia=$usuarios[0]["pass"];
+                    //if (password_verify("123", $_contrasenia)) {                        
+                    if (strcmp($pass,$_contrasenia) == 0 ) {
                         $statusCode=200; 
                         $response["message"]["type"] = "OK"; 
                         $response["message"]["description"] = "Ingreso Correcto";
@@ -258,7 +258,8 @@ class UsuarioRepositorio
                     while($row = $result->fetch_assoc()) {                        
                         $_contrasenia=$row['contrasenia'];               
                     }
-                    if (password_verify($passAnterior, $_contrasenia)) {
+                    //if (password_verify($passAnterior, $_contrasenia)) {
+                    if (strcmp($passAnterior,$_contrasenia) == 0 ) {
 
                         $stmt = $conn->prepare('UPDATE '.$this->tabla.' SET contrasenia = ? where id= ?  ');
                         $stmt->bind_param('si', $pass,  $usuario); // 's' specifies the variable type => 'string' a las dos variables            

@@ -3,10 +3,11 @@ include_once  ROOT_PATH.'/include/Conexion.php';
 /**
 * this class represents a catalogo y detallecatalogo
 */
-class CatalogoRepositorio 
-{
-    protected $atributos = ['codigo','descripcion', 'catalogo'];
-    protected $tabla="detallecatalogo";
+class MenuRepositorio 
+{   
+
+    protected $atributos = ['id','tipo', 'nombre', 'fecha', 'estado', 'cantidadinicial', 'cantidadactual', 'comida'];
+    protected $tabla="menu";
 
     private function leerResultado($result, $arrAtrib){  
         $usuarios = array();       

@@ -1,10 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS');
-header("Access-Control-Allow-Headers: X-Requested-With");
-header('Content-Type: text/html; charset=utf-8');
-header ('P3P: CP="IDC DSP COR CURa ADMa OUR IND PHY ONL COM STA"');
+
 require '../vendor/slim/slim/Slim/Slim.php';
 use Slim\Slim\PhpRenderer;
 include_once '../src/include/Conexion.php';
@@ -15,68 +10,37 @@ $app = new \Slim\Slim();
 $_token="123TBab5";
 
 
-$app->post('/ingreso_usuario', function () use ($app)  {
-	$response = array();
-	$error=true;
-	$mensaje='';	
-	$vehiculos = array();
-	try {
-		$conn=OpenCon();
-		$data = json_decode($app->request->getBody());
-		$usuario =  $_POST["usuario"];
-		$pass =  $_POST["pass"];
-		$nombre =  $_POST["nombre"];
-		$apellido =  $_POST["apellido"];
-		$ci =  $_POST["ci"];
-		$direccion =  $_POST["direccion"];
-		$telefono =  $_POST["telefono"];
-		$correo =  $_POST["correo"];
-		$tipo =  "1";
+define('ROOT_PATH', dirname(__DIR__) );
 
-		
-		CloseCon($conn);
-	} catch (Exception $e) {
-		$error=true;
-		$mensaje=$e->getMessage();
-	}
-	$response["error"] = $error;
-	$response["message"] = $mensaje; 
-	$response["vehiculos"] = $vehiculos;
-	return jsonResponse(200, $response);
+require_once  ROOT_PATH.'/src/Repositorio/MenuRepositorio.php';
+
+require_once  ROOT_PATH.'/src/Repositorio/UsuarioRepositorio.php';
+require_once  ROOT_PATH.'/src/Repositorio/ConceptoRepositorio.php';
+require_once  ROOT_PATH.'/src/Repositorio/MovimientoRepositorio.php';
+require_once  ROOT_PATH.'/src/Repositorio/CuentaRepositorio.php';
+require_once  ROOT_PATH.'/src/Repositorio/ContableRepositorio.php';
+
+
+
+/**
+ * Menu Repositorio *************************************************************
+ */
+
+$app->get('/menu', function () use ($app)  {           
+	$menuRepo = new MenuRepositorio;
+	$menuRepo = $menuRepo->findAll();  
+	return jsonResponse(200, $menuRepo); 
 });
 
 
 
 
-$app->get('/ingreso_seguimiento_vehiculo/:placa/:camara/:fecha/:hora/:token', function ($placa, $camara, $fecha, $hora,  $token) use ($app, $_token)  {
-	$response = array();
-	$error=true;
-	$mensaje='';	
-	if(strcmp($token, $_token) == 0){
-		try {
-			$conn=OpenCon();
-			$fecha=$fecha." ".$hora;		
-			$query = "INSERT INTO seguimiento_vehiculos (placa, camara, fecha) VALUES ('".$placa."', '".$camara."', '".$fecha."');";
-			if (mysqli_query($conn, $query)) {
-				$error=false;
-				$mensaje='Se ha ingresado el suceso';			
-			} else {
-				$mensaje='No se ha ingresado el suceso. '.mysqli_error($conn);
-			}
-			CloseCon($conn);
-		} catch (Exception $e) {
-			$error=true;
-			$mensaje=$e->getMessage();
-		}
-	}else{
-		$error=true;
-		$mensaje="Token invalido";
-	}
-	$response["error"] = $error;
-	$response["message"] = $mensaje; 
-	return jsonResponse(200, $response);
+$app->post('/login', function () use ($app)  {  	
+	$repo = new UsuarioRepositorio;
+	$input = json_decode($app->request->getBody());		      
+	$usuarios = $repo->login($input);   
+	return jsonResponse(200, $usuarios); 
 });
-
 
 
 
@@ -141,24 +105,22 @@ $app->run();
 //   FUNCIONES NECESARIAS //
 
 
-
-
 /**
 * Mostrando la respuesta en formato json al cliente o navegador
 * @param String $status_code Http response code
 * @param Int $response Json response
 */
 function jsonResponse($status_code, $response) {
+	if( gettype($response) == 'string' ){
+		$response=json_decode($response);
+	}
 	$app = \Slim\Slim::getInstance();
 	// Http response code
 	$app->status($status_code);
-
 	$json_response = $app->response; 
 	$json_response['Content-Type'] = 'application/json'; 
 	$json_response->body( json_encode($response) ); 
-
 	return $json_response;
-	
 } 
 
 
