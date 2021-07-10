@@ -13,12 +13,9 @@ $_token="123TBab5";
 define('ROOT_PATH', dirname(__DIR__) );
 
 require_once  ROOT_PATH.'/src/Repositorio/MenuRepositorio.php';
-
 require_once  ROOT_PATH.'/src/Repositorio/UsuarioRepositorio.php';
-require_once  ROOT_PATH.'/src/Repositorio/ConceptoRepositorio.php';
-require_once  ROOT_PATH.'/src/Repositorio/MovimientoRepositorio.php';
-require_once  ROOT_PATH.'/src/Repositorio/CuentaRepositorio.php';
-require_once  ROOT_PATH.'/src/Repositorio/ContableRepositorio.php';
+require_once  ROOT_PATH.'/src/Repositorio/ConsumoRepositorio.php';
+
 
 
 
@@ -28,11 +25,35 @@ require_once  ROOT_PATH.'/src/Repositorio/ContableRepositorio.php';
 
 $app->get('/menu', function () use ($app)  {           
 	$menuRepo = new MenuRepositorio;
-	$menuRepo = $menuRepo->findAll();  
+	$menuRepo = $menuRepo->findMenuDeHoy();  
 	return jsonResponse(200, $menuRepo); 
 });
 
+$app->post('/ingresarmenu', function () use ($app)  {  	
+	$repo = new MenuRepositorio;
+	$input = json_decode($app->request->getBody());		      
+	$usuarios = $repo->ingresarMenu($input);   
+	return jsonResponse(200, $usuarios); 
+});
 
+
+$app->post('/eliminarmenu', function () use ($app)  {  	
+	$repo = new MenuRepositorio;
+	$input = json_decode($app->request->getBody());		      
+	$usuarios = $repo->eliminarMenu($input);   
+	return jsonResponse(200, $usuarios); 
+});
+
+/**
+ * Consumo Repositorio *************************************************************
+ */
+
+$app->post('/ingresarconsumo', function () use ($app)  {  	
+	$repo = new ConsumoRepositorio;
+	$input = json_decode($app->request->getBody());		      
+	$usuarios = $repo->ingresarConsumo($input);   
+	return jsonResponse(200, $usuarios); 
+});
 
 
 $app->post('/login', function () use ($app)  {  	

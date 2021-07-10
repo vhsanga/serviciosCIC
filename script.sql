@@ -127,3 +127,5 @@ INSERT INTO cic.menu (tipo,nombre,fecha,estado,cantidadinicial,cantidadactual,co
 
 UPDATE cic.menu
 	SET fecha='2021-07-03'
+
+
